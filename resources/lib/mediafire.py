@@ -98,9 +98,9 @@ class mediafire(cloudservice):
     def login(self):
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
-        opener.addheaders = [('User-Agent', self.user_agent)]
+        opener.addheaders = [('User-Agent', self.user_agent),('X-Requested-With' ,'XMLHttpRequest')]
 
-        url = 'https://app.box.com/login/ '
+        url = 'http://www.mediafire.com/dynamic/client_login/mediafire.php'
 
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
@@ -115,30 +115,46 @@ class mediafire(cloudservice):
         response_data = response.read()
         response.close()
 
-        for cookie in self.cookiejar:
-            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
-                        str(cookie), re.DOTALL):
-                cookieType,cookieValue = r.groups()
-                if cookieType == 'MSPRequ':
-                    self.authorization.setToken(cookieType,cookieValue)
 
-        for r in re.finditer('(request_token) \= \'([^\']+)\'',
-                             response_data, re.DOTALL):
-            requestTokenName,requestTokenValue = r.groups()
-
-
-        if (requestTokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'requestTokenValue')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'requestTokenValue', xbmc.LOGERROR)
-            return
-
+        url = 'http://www.mediafire.com/dynamic/client_login/mediafire.php'
 
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
 
         # try login
         try:
-            response = opener.open(request, 'login='+self.authorization.username+'&password='+self.addon.getSetting(self.instanceName+'_password')+'&request_token='+requestTokenValue)
+            response = opener.open(request,'login_email='+self.authorization.username+'&login_pass='+self.addon.getSetting(self.instanceName+'_password')+'&login_remember=on')
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+        for cookie in self.cookiejar:
+            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+                        str(cookie), re.DOTALL):
+                cookieType,cookieValue = r.groups()
+
+        sessionValue=''
+        for r in re.finditer('(parent)\.bqx\(\"([^\"]+)\"' ,response_data, re.DOTALL):
+            sessionName,sessionValue = r.groups()
+
+
+#        sessionValue = self.authorization.getToken('session')
+        if (sessionValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'sessionValue', xbmc.LOGERROR)
+            return
+
+        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=folders&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key=myfiles&session_token='+sessionValue+'&response_format=json'
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request)
 
         except urllib2.URLError, e:
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
