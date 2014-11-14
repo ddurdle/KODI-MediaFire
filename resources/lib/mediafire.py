@@ -217,7 +217,7 @@ class mediafire(cloudservice):
                     media = package.package(0,folder.folder(subfolderID,subfolderName))
                     mediaFiles.append(media)
 
-        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=videos&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key='+folderName+'&session_token='+sessionValue+'&response_format=json'
+        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=files&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key='+folderName+'&session_token='+sessionValue+'&response_format=json'
 
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
@@ -233,14 +233,15 @@ class mediafire(cloudservice):
         response.close()
 
 
-        mediaFiles = []
         # parsing page for files
-        for r in re.finditer('\{\"folderkey\"\:.*?\"dropbox_enabled\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
+        for r in re.finditer('\{\"quickkey\"\:.*?\"links\"\:\{[^\}]+\}\}' ,response_data, re.DOTALL):
                 entry = r.group()
-                for q in re.finditer('\"folderkey\"\:\"([^\"]+)\"\,\"name\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    folderID,folderName = q.groups()
+                for q in re.finditer('\"quickkey\"\:\"([^\"]+)\"\,.*?\"filename\"\:\"([^\"]+)\".*?\"normal_download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,downloadURL = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
 
-                    media = package.package(0,folder.folder(folderID,folderName))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
+                    media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
 
@@ -253,20 +254,17 @@ class mediafire(cloudservice):
     ##
     def getPlaybackCall(self, playbackType, package):
 
+        downloadURL = package.getMediaURL()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
-        opener.addheaders = [('User-Agent', self.user_agent)]
+        opener.addheaders = [('User-Agent', self.user_agent),('X-Requested-With' ,'XMLHttpRequest')]
 
-        zValue = self.authorization.getToken('z')
-
-        if (zValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'z')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'z', xbmc.LOGERROR)
+        sessionValue = self.authorization.getToken('session_token')
+        if (sessionValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'sessionValue', xbmc.LOGERROR)
             return
 
-        url = 'https://app.box.com/files'
-
-        opener.addheaders = [('User-Agent', self.user_agent),('Cookie', 'z='+zValue+';')]
-        request = urllib2.Request(url)
+        request = urllib2.Request(downloadURL)
 
         # if action fails, validate login
 
@@ -281,47 +279,14 @@ class mediafire(cloudservice):
         response.close()
 
 
-        requestTokenValue=''
-        for r in re.finditer('(request_token) \= \'([^\']+)\'' ,response_data, re.DOTALL):
-            requestTokenName,requestTokenValue = r.groups()
-
-        subIDValue=''
-        for r in re.finditer('(realtime_subscriber_id) \=\'([^\']+)\'' ,response_data, re.DOTALL):
-            subIDName,subIDValue = r.groups()
-
-        if (requestTokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'requestTokenValue')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'requestTokenValue', xbmc.LOGERROR)
-            return
-
-        if (subIDValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'subIDValue')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'subIDValue', xbmc.LOGERROR)
-            return
-
-        url = 'https://app.box.com/index.php?rm=box_download_file_via_post'
-
-
-        request = urllib2.Request(url)
-
-                # if action fails, validate login
-
-        try:
-            response = opener.open(request,'file_id='+package.file.id+'&request_token='+requestTokenValue)
-
-        except urllib2.URLError, e:
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-            return
-
         downloadURL=''
-        downloadURL = response.info().getheader('Location')
-        response.close()
+        for r in re.finditer('(kNO) \= \"([^\"]+)\"\;' ,response_data, re.DOTALL):
+            urlName,downloadURL = r.groups()
 
         if (downloadURL == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'downloadURL')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'downloadURL', xbmc.LOGERROR)
             return
-
         return downloadURL
 
 

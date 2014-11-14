@@ -68,7 +68,11 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
 
-    url = PLUGIN_URL+'?mode=video&title='+package.file.title+'&filename='+package.file.id
+    url = package.getMediaURL()
+    cleanURL = re.sub('---', '', url)
+    cleanURL = re.sub('&', '---', cleanURL)
+    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
+
 
 
 #    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
@@ -459,6 +463,7 @@ elif mode == 'streamurl':
     mediaFolder = folder.folder('','')
     media = package.package(mediaFile,mediaFolder)
     cleanURL = re.sub('---', '&', url)
+#    cleanURL = re.sub('_', '+', cleanURL)
 
     media.setMediaURL(mediaurl.mediaurl(cleanURL,'','',''))
     url = oc.getPlaybackCall(0,media)
