@@ -87,7 +87,6 @@ class mediafire(cloudservice):
 
         self.user_agent = user_agent
 
-
         self.login();
 
 
@@ -139,43 +138,8 @@ class mediafire(cloudservice):
         sessionValue=''
         for r in re.finditer('(parent)\.bqx\(\"([^\"]+)\"' ,response_data, re.DOTALL):
             sessionName,sessionValue = r.groups()
+            self.authorization.setToken('session_token',sessionValue)
 
-
-#        sessionValue = self.authorization.getToken('session')
-        if (sessionValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'sessionValue', xbmc.LOGERROR)
-            return
-
-        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=folders&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key=myfiles&session_token='+sessionValue+'&response_format=json'
-
-        request = urllib2.Request(url)
-        self.cookiejar.add_cookie_header(request)
-
-        # try login
-        try:
-            response = opener.open(request)
-
-        except urllib2.URLError, e:
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-            return
-        response_data = response.read()
-        response.close()
-
-
-        for cookie in self.cookiejar:
-            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
-                        str(cookie), re.DOTALL):
-                cookieType,cookieValue = r.groups()
-                if cookieType == 'z':
-                    self.authorization.setToken(cookieType,cookieValue)
-
-        zValue = self.authorization.getToken('z')
-
-        if (zValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'z')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'z', xbmc.LOGERROR)
-            return
 
         return
 
@@ -215,88 +179,69 @@ class mediafire(cloudservice):
     def getMediaList(self, folderName='', cacheType=CACHE_TYPE_MEMORY):
 
         if folderName == '':
-            folderName = 'root'
+            folderName = 'myfiles'
 
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-        opener.addheaders = [('User-Agent', self.user_agent)]
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
+        opener.addheaders = [('User-Agent', self.user_agent),('X-Requested-With' ,'XMLHttpRequest')]
 
-        zValue = self.authorization.getToken('z')
 
-        if (zValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'z')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'z', xbmc.LOGERROR)
+        sessionValue = self.authorization.getToken('session_token')
+        if (sessionValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'sessionValue', xbmc.LOGERROR)
             return
 
-#GET https://app.box.com/index.php?rm=box_content_workflow_get_winning_retention_for_folder&folderId=1206422275 HTTP/1.1
-#GET https://app.box.com/files
+        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=folders&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key='+folderName+'&session_token='+sessionValue+'&response_format=json'
 
-        if folderName=='':
-            url = 'https://app.box.com/files'
-        else:
-            url = 'https://app.box.com/index.php?rm=box_item_list&q[id]=d_'+folderName+'&q[page_num]=0&q[page_size]=20&q[theme_id]=1&q[collection_id]=0'
-
-        opener.addheaders = [('User-Agent', self.user_agent),('Cookie', 'z='+zValue+';')]
         request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
 
-        # if action fails, validate login
-
+        # try login
         try:
             response = opener.open(request)
 
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                return
-
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
         response_data = response.read()
         response.close()
-        response_data = re.sub('\\\\', '', response_data)
-
-#        requestTokenValue=''
-#        for r in re.finditer('(request_token) \= \'([^\']+)\'' ,response_data, re.DOTALL):
-#            requestTokenName,requestTokenValue = r.groups()
-
-#        subIDValue=''
-#        for r in re.finditer('(realtime_subscriber_id) \=\'([^\']+)\'' ,response_data, re.DOTALL):
-#            subIDName,subIDValue = r.groups()
-
-#        if (requestTokenValue == ''):
-#            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'requestTokenValue')
-#            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'requestTokenValue', xbmc.LOGERROR)
-#            return
-
-#        if (subIDValue == ''):
-#            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'subIDValue')
-#            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'subIDValue', xbmc.LOGERROR)
-#            return
 
 
         mediaFiles = []
         # parsing page for files
-        for r in re.finditer('\{\"audio\"\:.*?\"userRole\"\:0\}' ,response_data, re.DOTALL):
+        for r in re.finditer('\{\"folderkey\"\:.*?\"dropbox_enabled\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
-                for q in re.finditer('\"(download)\"\:\"([^\"]+)\",' ,entry, re.DOTALL):
-                    downloadID,downloadURL = q.groups()
-                for q in re.finditer('\"(title)\"\:\"([^\"]+)\",' ,entry, re.DOTALL):
-                    titleID,title = q.groups()
+                for q in re.finditer('\"folderkey\"\:\"([^\"]+)\"\,\"name\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    subfolderID,subfolderName = q.groups()
 
-                downloadURL = re.sub('\\\\', '', downloadURL)
-                downloadURL = re.sub('\%20', '+', downloadURL)
+                    media = package.package(0,folder.folder(subfolderID,subfolderName))
+                    mediaFiles.append(media)
 
-                media = package.package(file.file(title, title, title, self.AUDIO, '', ''),folder.folder('',''))
-                media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
-                mediaFiles.append(media)
+        url = 'https://www.mediafire.com/api/folder/get_content.php?r=mvbn&content_type=videos&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.2&folder_key='+folderName+'&session_token='+sessionValue+'&response_format=json'
 
-        for r in re.finditer('data\-downloadurl\=\"video\/[^\:]+\:([^\:]+)\:\/index\.php\?rm\=box_v2_download_file\&amp\;file_id\=([^\&]+)\&amp\;print_download_url\=1\"' ,response_data, re.DOTALL):
-                fileName,fileID = r.groups()
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
 
-                media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
-                mediaFiles.append(media)
+        # try login
+        try:
+            response = opener.open(request)
 
-        for r in re.finditer('data\-item_id\=\"([^\"]+)\" data\-item_type\=\"folder\" data\-behavior\=\"edit_in_place\" data\-validate\=\"filename not_empty_item_type\"\>([^\<]+)\<\/a\>' ,response_data, re.DOTALL):
-                folderID,folderName = r.groups()
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
 
-                media = package.package(0,folder.folder(folderID,folderName))
-                mediaFiles.append(media)
+
+        mediaFiles = []
+        # parsing page for files
+        for r in re.finditer('\{\"folderkey\"\:.*?\"dropbox_enabled\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
+                for q in re.finditer('\"folderkey\"\:\"([^\"]+)\"\,\"name\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    folderID,folderName = q.groups()
+
+                    media = package.package(0,folder.folder(folderID,folderName))
+                    mediaFiles.append(media)
 
 
         return mediaFiles
