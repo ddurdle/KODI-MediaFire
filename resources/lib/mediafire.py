@@ -47,6 +47,7 @@ import folder
 import file
 import package
 import mediaurl
+import crashreport
 
 #
 #
@@ -75,6 +76,8 @@ class mediafire(cloudservice):
         self.PLUGIN_URL = PLUGIN_URL
         self.addon = addon
         self.instanceName = instanceName
+
+        self.crashreport = crashreport.crashreport(self.addon)
 
         try:
             username = self.addon.getSetting(self.instanceName+'_username')
@@ -188,6 +191,7 @@ class mediafire(cloudservice):
         sessionValue = self.authorization.getToken('session_token')
         if (sessionValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
+            self.crashreport.sendError('getMediaList:sessionValue','not set')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'sessionValue', xbmc.LOGERROR)
             return
 
@@ -261,6 +265,7 @@ class mediafire(cloudservice):
         sessionValue = self.authorization.getToken('session_token')
         if (sessionValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'sessionValue')
+            self.crashreport.sendError('getPlaybackCall:sessionValue','not set')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'sessionValue', xbmc.LOGERROR)
             return
 
@@ -285,6 +290,7 @@ class mediafire(cloudservice):
 
         if (downloadURL == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'downloadURL')
+            self.crashreport.sendError('getPlaybackCall:downloadURL',response_data)
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'downloadURL', xbmc.LOGERROR)
             return
         return downloadURL

@@ -272,7 +272,7 @@ if mode == 'main' or mode == 'folder':
                         if username != '':
 
                             #let's log in
-                            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+                            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
                             loop = False
                     except:
                         break
@@ -307,36 +307,36 @@ if mode == 'main' or mode == 'folder':
                     xbmcplugin.endOfDirectory(plugin_handle)
 
             #let's log in
-            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
 
 
         # show entries of a single account (such as folder)
         elif instanceName != '':
 
-            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
 
         try:
-            oc
+            service
         except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
-            log(aaddon.getLocalizedString(30050)+ 'oc', True)
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
-        mediaItems = oc.getMediaList(folderName,0)
+        mediaItems = service.getMediaList(folderName,0)
 
         if mediaItems:
             for item in mediaItems:
 
                 try:
                     if item.file == 0:
-                        addDirectory(oc, item.folder)
+                        addDirectory(service, item.folder)
                     else:
-                        addMediaFile(oc, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, cacheType, item)
                 except:
-                        addMediaFile(oc, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, cacheType, item)
 
-        oc.updateAuthorization(addon)
+        service.updateAuthorization(addon)
 
 
 #play a video given its exact-title
@@ -380,7 +380,7 @@ elif mode == 'video' or mode == 'audio':
                         if username != '':
 
                             #let's log in
-                            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+                            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
 
                     except:
                         break
@@ -391,19 +391,19 @@ elif mode == 'video' or mode == 'audio':
 
     elif instanceName != '':
 
-            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
 
     try:
-            oc
+            service
     except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
-            log(aaddon.getLocalizedString(30050)+ 'oc', True)
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
-    url = oc.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
+    url = service.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
 
     item = xbmcgui.ListItem(path=url)
     item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
@@ -438,7 +438,7 @@ elif mode == 'streamurl':
                         if username != '':
 
                             #let's log in
-                            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+                            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
                             loop = False
                     except:
                         break
@@ -449,13 +449,13 @@ elif mode == 'streamurl':
 
     elif instanceName != '':
 
-            oc = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
+            service = mediafire.mediafire(PLUGIN_URL,addon,instanceName, user_agent)
 
     try:
-            oc
+            service
     except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
-            log(aaddon.getLocalizedString(30050)+ 'oc', True)
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
@@ -466,7 +466,7 @@ elif mode == 'streamurl':
 #    cleanURL = re.sub('_', '+', cleanURL)
 
     media.setMediaURL(mediaurl.mediaurl(cleanURL,'','',''))
-    url = oc.getPlaybackCall(0,media)
+    url = service.getPlaybackCall(0,media)
 
     item = xbmcgui.ListItem(path=url)
     item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
