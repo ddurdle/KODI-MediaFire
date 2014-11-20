@@ -132,6 +132,7 @@ class mediafire(cloudservice):
             return
         response_data = response.read()
         response.close()
+        self.crashreport.sendError('test',response_data)
 
         for cookie in self.cookiejar:
             for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
