@@ -132,7 +132,7 @@ class mediafire(cloudservice):
             return
         response_data = response.read()
         response.close()
-        self.crashreport.sendError('test',response_data)
+#        self.crashreport.sendError('test',response_data)
 
         for cookie in self.cookiejar:
             for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
@@ -288,6 +288,14 @@ class mediafire(cloudservice):
         downloadURL=''
         for r in re.finditer('(kNO) \= \"([^\"]+)\"\;' ,response_data, re.DOTALL):
             urlName,downloadURL = r.groups()
+
+        if downloadURL == '':
+            try:
+                if response.info().getheader('Location') != '':
+                    return response.info().getheader('Location')
+            except:
+                pass
+
 
         if (downloadURL == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'downloadURL')
