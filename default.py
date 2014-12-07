@@ -326,7 +326,7 @@ if mode == 'main' or mode == 'folder':
         mediaItems = service.getMediaList(folderName,0)
 
         if mediaItems:
-            for item in mediaItems:
+            for item in sorted(mediaItems):
 
                 try:
                     if item.file == 0:

@@ -50,6 +50,9 @@
     <string id="30051">Your login failed.</string>
     <string id="30052">Ensure that your username and password are set in settings.</string>
     <string id="30053">Only Email login is supported (no Facebook, no Google).</string>
+    <string id="30054">Captcha prompt.</string>
+    <string id="30055">Site is requesting you fill out an authorized download form</string>
+    <string id="30056">Log onto website, click download on any video and fill form.</string>
     <string id="30070">Would you like to send the error details to the developer?</string>
     <string id="30071">No passwords will be sent.</string>
     <string id="30072">You will be provided an identifer number after sent.</string>

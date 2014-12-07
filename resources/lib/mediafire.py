@@ -284,6 +284,11 @@ class mediafire(cloudservice):
         response_data = response.read()
         response.close()
 
+        for r in re.finditer('(id)\=\"(form_captcha)\"' ,response_data, re.DOTALL):
+            captcha,downloadURL = r.groups()
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30054),addon.getLocalizedString(30055), addon.getLocalizedString(30056))
+            return None
+
 
         downloadURL=''
         for r in re.finditer('(kNO) \= \"([^\"]+)\"\;' ,response_data, re.DOTALL):
