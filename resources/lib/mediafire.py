@@ -1,6 +1,7 @@
 '''
-    MediaFire XBMC Plugin
-    Copyright (C) 2013-2014 ddurdle
+    MediaFire for KODI / XBMC Plugin
+    Copyright (C) 2013-2016 ddurdle
+
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -125,7 +126,7 @@ class mediafire(cloudservice):
 
         # try login
         try:
-            response = opener.open(request,'login_email='+self.authorization.username+'&login_pass='+self.addon.getSetting(self.instanceName+'_password')+'&login_remember=on')
+            response = opener.open(request,'security=JbZnBwo4XmoMgDwOn1yTTicb8LWH9OVhDYoGWHIIrRLau8ZpSO22qWl2QgwlFKnH&login_email='+self.authorization.username+'&login_pass='+self.addon.getSetting(self.instanceName+'_password')+'&login_remember=on')
 
         except urllib2.URLError, e:
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)

@@ -1,6 +1,6 @@
 '''
-    MediaFire XBMC Plugin
-    Copyright (C) 2013-2014 ddurdle
+    MediaFire for KODI / XBMC Plugin
+    Copyright (C) 2013-2016 ddurdle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,14 +72,6 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
     url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
-
-
-
-#    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
-#    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
-#    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
-#    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
-    #cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
 
 #    listitem.addContextMenuItems( commands )
     if cm:
