@@ -1,3 +1,6 @@
+v0.2.0  (2016-02-07)
+- fix site changes
+- add support for "Following" playback
 v0.1.4  (2015-06-03)
 - catch captcha prompts
 v0.1.3  (2015-04-03)

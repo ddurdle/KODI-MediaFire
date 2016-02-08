@@ -311,9 +311,11 @@ if mode == 'main' or mode == 'folder':
             service
         except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
+            log(addon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
+        if folderName == '':
+            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FOLLOWING','<<Following>>')
 
         mediaItems = service.getMediaList(folderName,0)
 
@@ -389,7 +391,7 @@ elif mode == 'video' or mode == 'audio':
             service
     except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
+            log(addon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
@@ -447,7 +449,7 @@ elif mode == 'streamurl':
             service
     except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-            log(aaddon.getLocalizedString(30050)+ 'mediafire-login', True)
+            log(addon.getLocalizedString(30050)+ 'mediafire-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
